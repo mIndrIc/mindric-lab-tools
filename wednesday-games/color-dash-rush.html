@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Dash Rush</title>
+    <style>
+        :root {
+            --color-primary: #FF6B35;
+            --color-secondary: #004E89;
+            --color-accent: #1ABC9C;
+            --color-bg: #0F1419;
+            --color-text: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, var(--color-bg) 0%, #1a1f2e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--color-text);
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(255, 107, 53, 0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, var(--color-primary), var(--color-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        .stat-box {
+            background: rgba(255, 107, 53, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            flex: 1;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            color: #AAA;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .color-block {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: all 0.1s;
+            border: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-text);
+            user-select: none;
+        }
+
+        .color-block:hover {
+            transform: scale(1.05);
+        }
+
+        .color-block.active {
+            transform: scale(0.95);
+            box-shadow: 0 0 20px currentColor;
+        }
+
+        .color-block.correct {
+            animation: pulse 0.3s;
+        }
+
+        .color-block.wrong {
+            animation: shake 0.3s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            font-size: 1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-start {
+            background: linear-gradient(45deg, var(--color-primary), #FF8C42);
+            color: white;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-reset {
+            background: var(--color-secondary);
+            color: white;
+        }
+
+        .btn-reset:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 78, 137, 0.4);
+        }
+
+        .message {
+            margin: 20px 0;
+            font-size: 1.2em;
+            height: 30px;
+        }
+
+        .message.success {
+            color: var(--color-accent);
+            font-weight: bold;
+        }
+
+        .message.error {
+            color: #FF5252;
+            font-weight: bold;
+        }
+
+        .timer-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-accent), var(--color-primary));
+            width: 100%;
+            transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Color Dash Rush</h1>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">Score</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Level</div>
+                <div class="stat-value" id="level">1</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Best</div>
+                <div class="stat-value" id="best">0</div>
+            </div>
+        </div>
+
+        <div class="timer-bar">
+            <div class="timer-fill" id="timerFill"></div>
+        </div>
+
+        <div class="grid" id="grid">
+            <!-- Blocks werden hier eingefügt -->
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="button-group">
+            <button class="btn-start" id="startBtn" onclick="startGame()">Start</button>
+            <button class="btn-reset" id="resetBtn" onclick="resetGame()">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        const colors = ['#FF6B35', '#004E89', '#1ABC9C', '#F7B801'];
+        let sequence = [];
+        let userSequence = [];
+        let score = 0;
+        let level = 1;
+        let gameActive = false;
+        let timeLeft = 30;
+        let gameTimer = null;
+
+        const grid = document.getElementById('grid');
+        const scoreDisplay = document.getElementById('score');
+        const levelDisplay = document.getElementById('level');
+        const bestDisplay = document.getElementById('best');
+        const messageDisplay = document.getElementById('message');
+        const timerFill = document.getElementById('timerFill');
+
+        function initGrid() {
+            grid.innerHTML = '';
+            colors.forEach((color, index) => {
+                const block = document.createElement('div');
+                block.className = 'color-block';
+                block.style.background = color;
+                block.onclick = () => clickBlock(index);
+                grid.appendChild(block);
+            });
+        }
+
+        function startGame() {
+            sequence = [];
+            userSequence = [];
+            score = 0;
+            level = 1;
+            timeLeft = 30;
+            gameActive = true;
+            messageDisplay.textContent = '';
+            scoreDisplay.textContent = score;
+            levelDisplay.textContent = level;
+            
+            document.getElementById('startBtn').disabled = true;
+            nextRound();
+            startTimer();
+        }
+
+        function nextRound() {
+            if (!gameActive) return;
+            
+            userSequence = [];
+            const randomColor = Math.floor(Math.random() * colors.length);
+            sequence.push(randomColor);
+            level = Math.ceil(sequence.length / 2);
+            levelDisplay.textContent = level;
+            
+            setTimeout(() => playSequence(), 500);
+        }
+
+        function playSequence() {
+            let delay = 0;
+            sequence.forEach((colorIndex, i) => {
+                setTimeout(() => {
+                    highlightBlock(colorIndex);
+                }, delay);
+                delay += 400;
+            });
+        }
+
+        function highlightBlock(index) {
+            const blocks = document.querySelectorAll('.color-block');
+            blocks[index].classList.add('active');
+            playSound();
+            setTimeout(() => {
+                blocks[index].classList.remove('active');
+            }, 200);
+        }
+
+        function clickBlock(index) {
+            if (!gameActive) return;
+            
+            highlightBlock(index);
+            userSequence.push(index);
+
+            if (userSequence[userSequence.length - 1] !== sequence[userSequence.length - 1]) {
+                endGame('Falsch! 💥');
+                return;
+            }
+
+            if (userSequence.length === sequence.length) {
+                score += level * 10;
+                scoreDisplay.textContent = score;
+                messageDisplay.textContent = '✅ Korrekt!';
+                messageDisplay.className = 'message success';
+                setTimeout(() => {
+                    messageDisplay.textContent = '';
+                    nextRound();
+                }, 600);
+            }
+        }
+
+        function startTimer() {
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                timerFill.style.width = (timeLeft / 30) * 100 + '%';
+                
+                if (timeLeft <= 0) {
+                    endGame('Zeit vorbei! ⏱️');
+                }
+            }, 1000);
+        }
+
+        function endGame(message) {
+            gameActive = false;
+            clearInterval(gameTimer);
+            document.getElementById('startBtn').disabled = false;
+            messageDisplay.textContent = message;
+            messageDisplay.className = 'message error';
+
+            const best = parseInt(bestDisplay.textContent);
+            if (score > best) {
+                bestDisplay.textContent = score;
+                messageDisplay.textContent = message + ' 🎉 Neuer Highscore!';
+            }
+        }
+
+        function resetGame() {
+            gameActive = false;
+            clearInterval(gameTimer);
+            sequence = [];
+            userSequence = [];
+            score = 0;
+            level = 1;
+            timeLeft = 30;
+            scoreDisplay.textContent = score;
+            levelDisplay.textContent = level;
+            messageDisplay.textContent = '';
+            timerFill.style.width = '100%';
+            document.getElementById('startBtn').disabled = false;
+        }
+
+        function playSound() {
+            // Web Audio API für einfache Soundeffekte
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            osc.frequency.value = 400;
+            gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            
+            osc.start(audioContext.currentTime);
+            osc.stop(audioContext.currentTime + 0.1);
+        }
+
+        // Initialisierung
+        initGrid();
+        bestDisplay.textContent = localStorage.getItem('colorDashBest') || 0;
+    </script>
+</body>
+</html>
