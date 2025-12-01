@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 Contrast Checker | mIndrIc Lab</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #302b63;
+            margin-bottom: 10px;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 13px;
+        }
+
+        .color-section {
+            margin-bottom: 25px;
+        }
+
+        .color-section label {
+            display: block;
+            font-weight: 600;
+            color: #302b63;
+            margin-bottom: 8px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .color-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+
+        .color-input:focus {
+            outline: none;
+            border-color: #24243e;
+            box-shadow: 0 0 0 3px rgba(36, 36, 62, 0.1);
+        }
+
+        .color-picker {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .color-picker:hover {
+            transform: scale(1.05);
+        }
+
+        .preview {
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .results {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+
+        .result-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            color: #302b63;
+        }
+
+        .wcag-status {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.pass {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .swap-btn {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-top: 30px;
+            width: 100%;
+            padding: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .swap-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .swap-btn:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .color-input {
+                font-size: 12px;
+                padding: 10px;
+            }
+
+            .result-value {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Contrast Checker</h1>
+        <p class="subtitle">Überprüfe deine Farbkombinationen auf Barrierefreiheit</p>
+
+        <div class="color-section">
+            <label>Hintergrundfarbe (Background)</label>
+            <div class="input-group">
+                <input type="color" id="bgColor" class="color-picker" value="#ffffff">
+                <input type="text" id="bgText" class="color-input" value="#ffffff" placeholder="#ffffff">
+            </div>
+            <div id="bgPreview" class="preview" style="background: #ffffff; color: #000; border: 2px solid #e0e0e0;">
+                Hintergrund
+            </div>
+        </div>
+
+        <div class="color-section">
+            <label>Textfarbe (Foreground)</label>
+            <div class="input-group">
+                <input type="color" id="fgColor" class="color-picker" value="#000000">
+                <input type="text" id="fgText" class="color-input" value="#000000" placeholder="#000000">
+            </div>
+            <div id="fgPreview" class="preview" style="background: #000000; color: #ffffff; border: 2px solid #e0e0e0;">
+                Text
+            </div>
+        </div>
+
+        <button class="swap-btn" id="swapBtn">⇅ Farben tauschen</button>
+
+        <div class="results">
+            <div class="result-item">
+                <div class="result-label">Kontrastverhältnis</div>
+                <div class="result-value" id="ratio">21:1</div>
+            </div>
+
+            <div class="result-item">
+                <div class="result-label">WCAG Konformität</div>
+                <div class="wcag-status" id="wcagStatus">
+                    <span class="badge pass">AA ✓</span>
+                    <span class="badge pass">AAA ✓</span>
+                </div>
+            </div>
+
+            <div class="result-item">
+                <div class="result-label">Beschreibung</div>
+                <div style="color: #555; font-size: 13px; margin-top: 8px;" id="description">
+                    Perfekt! Beide Standards erfüllt.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const bgColor = document.getElementById('bgColor');
+        const fgColor = document.getElementById('fgColor');
+        const bgText = document.getElementById('bgText');
+        const fgText = document.getElementById('fgText');
+        const bgPreview = document.getElementById('bgPreview');
+        const fgPreview = document.getElementById('fgPreview');
+        const ratioDisplay = document.getElementById('ratio');
+        const wcagStatus = document.getElementById('wcagStatus');
+        const description = document.getElementById('description');
+        const swapBtn = document.getElementById('swapBtn');
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function getLuminance(rgb) {
+            if (!rgb) return 0;
+            const [r, g, b] = [rgb.r, rgb.g, rgb.b].map(val => {
+                val = val / 255;
+                return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
+            });
+            return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        }
+
+        function getContrast(hex1, hex2) {
+            const rgb1 = hexToRgb(hex1);
+            const rgb2 = hexToRgb(hex2);
+            const lum1 = getLuminance(rgb1);
+            const lum2 = getLuminance(rgb2);
+            const lighter = Math.max(lum1, lum2);
+            const darker = Math.min(lum1, lum2);
+            return ((lighter + 0.05) / (darker + 0.05)).toFixed(2);
+        }
+
+        function updateDisplay() {
+            const bg = bgColor.value;
+            const fg = fgColor.value;
+
+            bgText.value = bg;
+            fgText.value = fg;
+            bgPreview.style.backgroundColor = bg;
+            fgPreview.style.backgroundColor = fg;
+            fgPreview.style.color = bg;
+
+            const contrast = parseFloat(getContrast(bg, fg));
+            ratioDisplay.textContent = contrast + ':1';
+
+            let aaPass = contrast >= 4.5;
+            let aaaPass = contrast >= 7;
+
+            wcagStatus.innerHTML = `
+                <span class="badge ${aaPass ? 'pass' : 'fail'}">AA ${aaPass ? '✓' : '✗'}</span>
+                <span class="badge ${aaaPass ? 'pass' : 'fail'}">AAA ${aaaPass ? '✓' : '✗'}</span>
+            `;
+
+            if (contrast >= 7) {
+                description.textContent = '🎉 Perfekt! Beide WCAG Standards erfüllt.';
+            } else if (contrast >= 4.5) {
+                description.textContent = '✓ AA Standard erfüllt. AAA für Großschrift möglich.';
+            } else if (contrast >= 3) {
+                description.textContent = '⚠️ Nur für große Texte (18pt+) geeignet.';
+            } else {
+                description.textContent = '❌ Zu niedriger Kontrast. Nicht empfohlen.';
+            }
+        }
+
+        bgColor.addEventListener('change', updateDisplay);
+        fgColor.addEventListener('change', updateDisplay);
+        bgText.addEventListener('input', (e) => {
+            if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                bgColor.value = e.target.value;
+                updateDisplay();
+            }
+        });
+
+        fgText.addEventListener('input', (e) => {
+            if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                fgColor.value = e.target.value;
+                updateDisplay();
+            }
+        });
+
+        swapBtn.addEventListener('click', () => {
+            [bgColor.value, fgColor.value] = [fgColor.value, bgColor.value];
+            updateDisplay();
+        });
+
+        updateDisplay();
+    </script>
+</body>
+</html>
